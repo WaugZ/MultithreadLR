@@ -84,13 +84,13 @@ void fit(mat& x, mat& y, mat& theta) {
     }
     
     // mini-batch-gradient version
-//    int max_iter = 10;
+//    int max_iter = 100;
 //    int mini_batch = 10000;
 //    for (int j = 0; j < max_iter; j++) {
 //        x = arma::shuffle(x, 0);
 //        for (int i = 0; i < x.n_rows; i += mini_batch) {
 //            int lo = i;
-//            int hi = i < x.n_rows ? i : (x.n_rows - 1);
+//            int hi = i + mini_batch < x.n_rows ? (i + mini_batch) : (x.n_rows - 1);
 //            mat batch_x = x.rows(lo, hi);
 //            mat batch_y = y.rows(lo, hi);
 //            theta = theta - alpha * gradient(batch_x, batch_y, theta, lambda);
@@ -98,7 +98,7 @@ void fit(mat& x, mat& y, mat& theta) {
 ////             cout << cost(x, y, theta, lambda) << endl;
 //        }
 //    }
-    
+//    
 }
 
 int main(int argc, const char * argv[]) {
@@ -111,7 +111,6 @@ int main(int argc, const char * argv[]) {
     mat data_y;
     data_y.load("/Users/wangzi/PycharmProjects/Multi-threadLR/train_y.txt");
     cout << "data load finished in " << (clock() - s) * 1.0 / CLOCKS_PER_SEC << " s\n";
-    s = clock();
     
     unsigned long long N = data_x.n_rows;
     unsigned long long M = data_x.n_cols;
@@ -124,15 +123,23 @@ int main(int argc, const char * argv[]) {
     mat theta = arma::zeros(M, 1);
     cout << "normalizing...\n";
     normalize(train_x);
+    
+    time_t rawtime;
+    struct tm * timeinfo;
+    time (&rawtime);
+    timeinfo = localtime (&rawtime);
+    printf ("Before train: %s", asctime(timeinfo));
+    
     cout << "training...\n";
     fit(train_x, train_y, theta);
-    cout << "train finished in " << (clock() - s) * 1.0 / CLOCKS_PER_SEC << " s\n";
     cout << "train error: " << cost(train_x, train_y, theta, 1) << endl;
-    s = clock();
+    
+    time (&rawtime);
+    timeinfo = localtime (&rawtime);
+    printf ("After train: %s", asctime(timeinfo));
     
     cout << "cv testing...\n";
     normalize(cv_x);
     cout << "cv test error: " << cost(cv_x, cv_y, theta, 1) << endl;
-    cout << "cv test finished in " << (clock() - s) * 1.0 / CLOCKS_PER_SEC << " s\n";
     return 0;
 }
